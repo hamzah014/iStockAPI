@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.2/js/dataTables.fixedColumns.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/datatables.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <title>Test API</title>
+</head>
+<body>
+    
+    <button onclick="apiconnect()">Test API</button>
+    <button onclick="apinews()">Test API NEWS</button>
+    <br><br><br>
+    <div id="data"></div>
+
+    <script>
+
+        function resetTable(){
+            $('#myTable').html("");
+        }
+
+        function apiconnect(){
+            resetTable();
+            //url = "https://newsapi.org/v2/everything?q=bitcoin&apiKey=f4799781bf1146b29bd3443f5250c946";
+            url = "https://api.polygon.io/v2/reference/news?limit=100&apiKey=X9nrIiYxl0zQAWHFfi6ZImIuLXoXT3VJ";
+
+            datas = {
+                'name':'hamzah'
+            };
+
+            // $.post('http://192.168.0.158:5000/', {category:'client', type:'premium'}, function(response){ 
+            //       console.log(response);
+            // });
+            console.log("api connect try...........");
+            
+            fetch(url).then((res)=>{
+                return res.json();
+            }).then((data)=>{
+                console.log(data);
+            })
+
+
+
+        }
+
+        function apinews(){
+            resetTable();
+            url = "http://192.168.0.158:5000/stocknews";
+
+            console.log("my news api connect try...........");
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+                    console.log(result['results']);
+
+                    datas = result['results'];
+
+                    $.each( datas, function( key, value ) {
+                        //console.log( "val " + value[noVal] );
+                        console.log( "title " + value['title'] );
+
+                        title = value['title'];
+                        image_url = value['image_url'];
+
+                        $('#data').append(title);
+                        $('#data').append("<br/>");
+                        $('#data').append('<img src="'+image_url+'">');
+                        $('#data').append("<br/>");
+                        
+
+                    });
+
+
+                }
+            });
+
+
+
+        }
+
+
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.2/js/dataTables.fixedColumns.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/datatables.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <title>Test Chart</title>
+</head>
+<body>
+    <button onclick="showChart()">Show Chart</button>
+    <button onclick="showLine()">Show Line</button>
+    <a href="testpredict.html">Show Predict</a>
+    <hr/>
+    <h5>Choose Stock Name :</h5>
+    <select name="stockname" id="stockname">
+        <option value="">Select One</option>
+        <option value="ABT">ABT</option>
+        <option value="ALXN">ALXN</option>
+        <option value="AWK">AWK</option>
+    </select>
+    <button onclick="testdata()">Search Data</button>
+    <br><br><br>
+    <div id="chart"></div>
+
+    <script>
+        var datas = [
+            {
+              x: new Date(1538778600000),
+              y: [6629.81, 6650.5, 6623.04, 6633.33]
+            },
+            {
+              x: new Date(1538780400000),
+              y: [6632.01, 6643.59, 6620, 6630.11]
+            },
+            {
+              x: new Date(1538782200000),
+              y: [6630.71, 6648.95, 6623.34, 6635.65]
+            }
+          ];
+
+        var datas2 = [
+            {
+              x: new Date(1538778600000),
+              y: [6640.81, 6671.5, 6689.04, 6650.33]
+            },
+            {
+              x: new Date(1538780400000),
+              y: [6639.01, 6649.59, 6629, 6635.11]
+            },
+            {
+              x: new Date(1538782200000),
+              y: [6639.71, 6649.95, 6629.34, 6639.65]
+            }
+          ];
+
+        function showLine(){
+            
+        
+            var options = {
+            series: [{
+                name: "Actual",
+                data: [45, 52, 38, 24, 33, 26, 21, 20, 6, 8, 15, 10]
+            },
+            {
+                name: "Prediction",
+                data: [35, 41, 62, 42, 13, 18, 29, 37, 36, 51, 32, 35]
+            }
+            ],
+            chart: {
+            height: 350,
+            type: 'line',
+            zoom: {
+                enabled: false
+            },
+            },
+            title: {
+            text: 'Page Statistics',
+            align: 'left'
+            },
+            markers: {
+            size: 0,
+            hover: {
+                sizeOffset: 6
+            }
+            },
+            xaxis: {
+            categories: ['01 Jan', '02 Jan', '03 Jan', '04 Jan', '05 Jan', '06 Jan', '07 Jan', '08 Jan', '09 Jan',
+                '10 Jan', '11 Jan', '12 Jan'
+            ],
+            },
+            grid: {
+            borderColor: '#f1f1f1',
+            }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+
+        }
+      
+
+
+        function showChart(datass,stock){
+            
+            var options = {
+            series: [{
+            name: 'candle',
+            data: datass
+            }],
+            chart: {
+            height: 350,
+            type: 'candlestick',
+            },
+            title: {
+            text: 'Stock Data Information - '+stock,
+            align: 'left'
+            },
+            tooltip: {
+            enabled: true,
+            },
+            xaxis: {
+            type: 'category',
+            labels: {
+                formatter: function(val) {
+                return formatDate(val);
+                }
+            }
+            },
+            yaxis: {
+                tooltip: {
+                    enabled: true
+                }
+            }
+            };
+
+
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+
+        }
+
+        var dataapi = [];
+        
+        function testdata(){
+
+            var stockname = $('#stockname').val();
+            console.log("stock "+stockname);
+                
+            url = "http://192.168.0.158:5000/stockData";
+
+            datas = {
+                'stock':stockname,
+                'year':1
+            };
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(datas),
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+
+                    dataapi = [];
+
+                    console.log("start result");
+                    console.log(result);
+                        
+                    //console.log( "length " + Object.keys(result['Date']).length );
+
+                    var arrayLength = Object.keys(result['Date']).length;
+                    var loop = 0;
+
+                    for (let i = 0; i < arrayLength; i++) {
+                        
+                        console.log( "date " + result['Date'][i] );
+                        console.log( "Open " + result['Open'][i] );
+                        console.log( "Close " + result['Close'][i] );
+                        console.log( "High " + result['High'][i] );
+                        console.log( "Low " + result['Low'][i] );
+
+                        var dateval     = result['Date'][i];
+                        var openval     = result['Open'][i];
+                        var closeval    = result['Close'][i];
+                        var highval     = result['High'][i];
+                        var lowval      = result['Low'][i];
+
+                        var arraydata = {
+                                            x: new Date(dateval),
+                                            y: [openval,highval,lowval,closeval]
+                                        };
+
+                        dataapi.push(arraydata);
+
+                    }
+
+                    console.log(dataapi);
+                    showChart(dataapi,stockname);
+
+
+                }
+            });
+        
+        
+        
+        }
+
+        function formatDate(date){
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+
+
+    </script>
+
+</body>
+</html>

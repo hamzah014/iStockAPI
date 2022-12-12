@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.2/js/dataTables.fixedColumns.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/datatables.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <title>Test API</title>
+</head>
+<body>
+    
+    <button onclick="apiconnect()">Test API</button>
+    <button onclick="showData()">Show testdata</button>
+    <button onclick="testdata()">Test testdata</button>
+    <a href="testchart.html">Try chart</a>
+    <br><br><br>
+    <table id="myTable" class="table table-bordered" style="width:100%"></table>
+
+    <script>
+
+        function resetTable(){
+            $('#myTable').html("");
+        }
+
+        function apiconnect(){
+            resetTable();
+            url = "http://192.168.0.158:5000/";
+
+            datas = {
+                'name':'hamzah'
+            };
+
+            // $.post('http://192.168.0.158:5000/', {category:'client', type:'premium'}, function(response){ 
+            //       console.log(response);
+            // });
+            console.log("api connect try...........");
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(datas),
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+                    console.log(result);
+
+                }
+            });
+
+
+
+        }
+
+        
+        function showData(){
+            resetTable();
+                
+            url = "http://192.168.0.158:5000/stockData";
+
+            datas = {
+                'stock':'AAPL',
+                'year':1
+            };
+
+            // $.post('http://192.168.0.158:5000/', {category:'client', type:'premium'}, function(response){ 
+            //       console.log(response);
+            // });
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(datas),
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+                    console.log("start result");
+                    console.log(result);
+
+                    head = "<thead>";
+                    head += "<tr>";
+
+                    //generat header column
+                    $.each( result, function( key, value ) {
+                        console.log( key);
+
+                        head += "<td>" + key;
+                        head += "</td>";
+                        //console.log(head);
+
+                    });
+                    
+                    head += "</tr>";
+                    head += "</thead>";
+
+                    body = "<tbody>";
+                        
+                    //generat body row column
+                    var noVal = 0;
+                    $.each( result, function( key, value ) {
+                        //console.log( "val " + value[noVal] );
+                        console.log( "val " + key );
+                        var keys = key;
+                        body += "<td>";
+                        //body += "<tr>";
+                        $.each( value, function( keyv, valuev ) {
+
+                            if(keys == 'Date'){
+                                valuev = formatDate(valuev);
+                            }
+
+                            //console.log( "keyv " + valuev );
+                            body += "<table>";
+                            body += "<td>" + valuev;
+                            body += "</td>";
+                            body += "</table>";
+
+                        });
+
+                        //body += "</tr>";
+                        body += "</td>";
+
+                        noVal++;
+
+                    });
+
+                    body += "</tbody>";
+
+                    //console.log(head);
+
+                    $('#myTable').append(head);
+                    $('#myTable').append(body);
+                    $('#myTable').DataTable();
+
+
+                    console.log('result done');
+                }
+            });
+        
+        
+        
+        }
+        
+        function testdata(){
+            resetTable();
+                
+            url = "http://192.168.0.158:5000/fbprophet";
+
+            datas = {
+                'stock':'AAPL',
+                'year':1
+            };
+
+            // $.post('http://192.168.0.158:5000/', {category:'client', type:'premium'}, function(response){ 
+            //       console.log(response);
+            // });
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(datas),
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+                    console.log("start result");
+                    console.log(result);
+                    //console.log("result close 0 " + result['Close'][0]);
+                    //console.log("result close " + result['Close']);
+
+                    head = "<thead>";
+                    //head += "<tr>";
+
+                    //generat header column
+                    $.each( result, function( key, value ) {
+                        //console.log( key);
+
+                        head += "<th>" + key;
+                        head += "</th>";
+                        //console.log(head);
+
+                    });
+                    
+                    //head += "</tr>";
+                    head += "</thead>";
+
+                    body = "<tbody>";
+                        
+                    //generat body row column
+                    var keys = '';
+                    $.each( result, function( key, value ) {
+                        var noVal = 0;
+                        var noVal2 = 0;
+                        
+                        console.log( "key " + key );
+                        keys = key;
+                        body += "<td>";
+
+                        console.log("length - " + keys + " - " + Object.keys(value).length);
+                            
+                        $.each( value, function( keyv, valuev ) {
+                            //console.log( "keyv " + valuev );
+
+                            var showVal = valuev;
+
+                            if(keys != "ds"){
+                                if(valuev==""){
+                                    noVal2++;
+
+                                }
+                            }else{
+                                showVal = formatDate(valuev);
+                                if(noVal == 2351){
+                                    console.log('date ni last - ' + showVal);
+
+                                }
+                                noVal++;
+                            }
+
+                            body += "<table style='width:100%'>";
+                            body += "<td>" + showVal;
+                            body += "</td>";
+                            body += "</table>";
+
+                        });
+                        console.log( "noval " + noVal );
+                        console.log( "noval2 " + noVal2 );
+
+                        
+                        body += "</td>";
+
+                    });
+
+                    body += "</tbody>";
+
+                    //console.log(head);
+
+                    $('#myTable').append(head);
+                    $('#myTable').append(body);
+                    $('#myTable').DataTable();
+
+
+                    console.log('result done');
+                }
+            });
+        
+        
+        
+        }
+
+        function formatDate(date){
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+
+
+    </script>
+
+</body>
+</html>
