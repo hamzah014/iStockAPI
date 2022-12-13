@@ -69,9 +69,9 @@ def fbpro():
     stockname = args['stock']
     startDate = args['startDate']
     lastDate = args['lastDate']
-    years = int(args['years'])
+    period = int(args['period'])
 
-    period = years * 365
+    #period = years * 365
     #period = 7
 
     data = yf.download(stockname , startDate, lastDate)
