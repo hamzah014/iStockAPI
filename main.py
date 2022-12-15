@@ -126,6 +126,8 @@ def stocknews():
 
     data = requests.get(api).json()
 
+    print(data)
+
     return data
 
 @app.route('/getStocks',methods=['POST'])
