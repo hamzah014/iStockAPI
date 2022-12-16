@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.2/js/dataTables.fixedColumns.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/datatables.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <title>Document</title>
+</head>
+<body>
+
+    <h5>Choose Stock Name :</h5>
+    <select name="stockname" id="stockname">
+        <option value="">Select One</option>
+        <option value="ABT">ABT</option>
+        <option value="ALXN">ALXN</option>
+        <option value="AWK">AWK</option>
+        <option value="GOOG">Google</option>
+    </select>
+    <hr/>
+    <h5>From Date</h5>
+    <input type="date" name="fromDate" id="fromDate">
+    <hr/>
+    <h5>To Date</h5>
+    <input type="date" name="toDate" id="toDate">
+    <hr/>
+    <h5>Years predict :</h5>
+    <input type="number" name="years" id="years">
+    <button onclick="testdata()">Search Data</button>
+    <br><br><br>
+    <div id="chart"></div>
+
+    <script>
+
+        var dataapi = [];
+
+        function testdata(){
+
+            //var stockname = $('#stockname').val();
+            var fromDate = $('#fromDate').val();
+            var toDate = $('#toDate').val();
+            var years = $('#years').val();
+            //console.log("stock "+stockname);
+
+            var stocks = ['AAL','GOOGL'];
+
+            allData = [];
+            datapred = 0;
+            dateData = [];
+
+            jQuery.each(stocks, function(index, stockname) {
+                
+                console.log("stock " + stockname);
+                datas = {
+                    'stock':stockname,
+                    'startDate':fromDate,
+                    'lastDate':toDate,
+                    'period':years
+                };
+            
+                let {actualData,predictData,dateData} = getAPI(datas);
+                console.log("return api");
+                console.log(predictData);
+
+                result = {
+                    name : stockname,
+                    data : actualData
+                };
+
+                allData.push(result);
+
+                dataada = actualData.length - years;
+                datapred = actualData.length - dataada;
+
+            });
+
+            console.log(allData);
+
+            testline(allData,dateData,datapred);
+        
+        }
+
+        function getAPI(datas){
+
+            url = "http://192.168.0.158:5000/fbprophet";
+
+            actualData = [];
+            predictData = [];
+            dateData = [];
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: JSON.stringify(datas),
+                crossDomain: true,
+                contentType : 'application/json',
+                success: function(result){
+
+                    console.log("start result");
+                    console.log(result);
+                        
+                    //console.log( "length " + Object.keys(result['Date']).length );
+
+                    var arrayLength = Object.keys(result['ds']).length;
+                    var loop = 0;
+
+                    for (let i = 0; i < arrayLength; i++) {
+                        
+                        console.log( "date " + result['ds'][i] );
+                        console.log( "predict " + result['yhat'][i] );
+                        console.log( "actual " + result['y'][i] );
+
+                        var dateval         = formatDate(result['ds'][i]);
+                        var predictVal      = result['yhat'][i];
+
+                        if(result['y'][i] == null){
+                            actualVal = predictVal;
+                        }else{
+                            var actualVal       = result['y'][i];
+                        }
+
+                        actualData.push(actualVal.toFixed(2));
+                        predictData.push(predictVal.toFixed(2));
+                        dateData.push(dateval);
+
+                    }
+
+                    console.log(actualData);
+                    console.log(predictData);
+                    console.log(dateData);
+                    //testline(actualData,predictData,dateData,years);
+
+                }
+            });
+
+            return {actualData,predictData,dateData};
+
+        }
+
+        function testline(datas,dateData,datapred){
+
+            // dataada = actualData.length - period;
+            // datapred = actualData.length - dataada;
+
+                
+            var options = {
+                series: datas,
+                chart: {
+                    height: 350,
+                    type: 'line',
+                },
+                forecastDataPoints: {
+                    count: datapred
+                },
+                stroke: {
+                    width: 5,
+                    curve: 'smooth'
+                },
+                xaxis: {
+                    type: 'datetime',
+                    categories: dateData
+                },
+                title: {
+                    text: 'Forecast',
+                    align: 'left',
+                    style: {
+                        fontSize: "16px",
+                        color: '#666'
+                    }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'dark',
+                        gradientToColors: [ '#FDD835'],
+                        shadeIntensity: 1,
+                        type: 'horizontal',
+                        opacityFrom: 1,
+                        opacityTo: 1,
+                        stops: [0, 100, 100, 100]
+                    },
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    floating: true,
+                    offsetY: -25,
+                    offsetX: -5
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+            
+        }
+
+        function formatDate(date){
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+    </script>
+    
+</body>
+</html>

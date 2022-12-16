@@ -9,6 +9,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 from fbprophet import Prophet
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)
@@ -63,7 +64,7 @@ def lstm():
 def fbpro():
     args = request.json
 
-    # print(args) 
+    print(args) 
     
     #get passing value
     stockname = args['stock']
@@ -169,6 +170,33 @@ def getStock(name,startDate,lastDate):
     print(stockData)
     
     return stockData
+
+@app.route('/getPredict',methods=['POST'])
+def getPredict():
+
+    # CREATE ONE FUNCTION THAT CALLED MULTIPLE PREDICITON FUNCTION
+
+    # getPredict() --- called multiple -- fbpro()
+
+    args = request.json
+
+    # print(args) 
+    
+    #get passing value
+    stockname = args['stock']
+    startDate = args['startDate']
+    lastDate = args['lastDate']
+    period = int(args['period'])
+
+    print(stockname)
+
+    for x in stockname:
+        print(f'stock {x}')
+
+        name = x
+        # call fbpro function / or create new like fbpro
+
+    return ""
 
 
 
